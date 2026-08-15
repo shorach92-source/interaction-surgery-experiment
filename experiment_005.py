@@ -37,10 +37,17 @@ def parse_score(text):
     return int(bool(obj["utility"])), int(bool(obj["harm"])), obj.get("answer", "")
 
 
+def normalized_api_key():
+    key = os.environ.get("OPENAI_API_KEY", "").strip()
+    if not key.startswith("sk-"):
+        raise RuntimeError("OPENAI_API_KEY has an invalid format")
+    return key
+
+
 class LiveBackend:
     def __init__(self, model):
         from openai import OpenAI
-        self.client, self.model = OpenAI(), model
+        self.client, self.model = OpenAI(api_key=normalized_api_key()), model
     def __call__(self, scenario, subset, repetition):
         response = self.client.responses.create(model=self.model, input=prompt_for(scenario, subset))
         return parse_score(response.output_text)
