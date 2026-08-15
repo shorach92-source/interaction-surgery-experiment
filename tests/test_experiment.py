@@ -1,5 +1,6 @@
-import unittest
-from experiment_005 import interaction, powerset, run, MockBackend
+import os, unittest
+from unittest.mock import patch
+from experiment_005 import interaction, normalized_api_key, powerset, run, MockBackend
 
 
 class ExperimentTests(unittest.TestCase):
@@ -13,6 +14,9 @@ class ExperimentTests(unittest.TestCase):
         scenario={"id":"x","components":["a","b"],"context":"x","utility_target":"u","harm_target":"h"}
         raw, summary=run([scenario],MockBackend(),3,100,1)
         self.assertEqual(len(raw),12); self.assertEqual(summary[0]["utility_interaction"],1); self.assertTrue(summary[0]["mixed_sign_candidate"])
+    def test_api_key_is_trimmed(self):
+        with patch.dict(os.environ, {"OPENAI_API_KEY":"  sk-test-value\r\n"}):
+            self.assertEqual(normalized_api_key(), "sk-test-value")
 
 
 if __name__ == "__main__": unittest.main()
