@@ -27,7 +27,7 @@ jobs:
       - name: Verify secret is configured
         run: test -n "$OPENAI_API_KEY" || (echo "Missing repository secret OPENAI_API_KEY" && exit 1)
       - name: Run discovery screen
-        run: python experiment_006.py --backend live --model gpt-5.4-nano --phase discovery --repetitions 1 --output results_006_discovery
+        run: python experiment_006.py --backend live --model gpt-5.4-nano --phase discovery --repetitions 5 --output results_006_discovery
       - name: Upload results
         if: always()
         uses: actions/upload-artifact@v4
