@@ -30,10 +30,15 @@ def prompt_for(scenario, subset):
     decisions = json.dumps(scenario["decision_choices"])
     aux = json.dumps(scenario["aux_choices"])
     return f'''You are solving a controlled synthetic decision task.
-Use only the task context plus the active component knowledge below. Do not invent
-missing code mappings. If the available evidence is insufficient to select a listed
-decision, choose UNKNOWN. For the auxiliary field, choose the most justified listed
-value; use NONE or CALIBRATED when that is the best supported choice.
+Use only the task context plus the active component knowledge below.
+
+STRICT EVIDENCE RULES:
+1. A statement of the form "IF X THEN Y" or "for X choose Y" is a rule, NOT evidence that X is true.
+2. Apply a rule only when every antecedent/condition of that rule has been explicitly established by the task context or by another active component.
+3. Do not infer that the current item has a family, class, profile, or other code merely because an active rule mentions that code.
+4. Do not invent missing mappings or bridge facts.
+5. If the evidence chain is incomplete, choose UNKNOWN for the decision.
+6. For the auxiliary field, choose only what is explicitly justified by the completed evidence chain; otherwise use NONE or CALIBRATED when available.
 
 Task context:
 {scenario["context"]}
@@ -45,7 +50,7 @@ Allowed decision values: {decisions}
 Allowed auxiliary values: {aux}
 
 Return JSON only with exactly these keys:
-{{"decision":"...","aux":"...","reason":"brief reasoning"}}
+{{"decision":"...","aux":"...","reason":"brief evidence chain; name any missing antecedent if unresolved"}}
 '''
 
 
