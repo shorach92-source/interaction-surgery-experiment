@@ -4,7 +4,7 @@
     "phase": "validation",
     "components": [
       {"name": "shipment_memory", "payload": "Synthetic memory: shipment SIGMA-41 belongs to family AMBER with match confidence 0.94."},
-      {"name": "routing_procedure", "payload": "Synthetic procedure: for family AMBER at 4C choose decision SOUTH. If the family-match confidence exceeds 0.90, choose auxiliary mode TURBO."}
+      {"name": "routing_procedure", "payload": "Synthetic routing table at 4C: family AMBER maps to SOUTH; family COBALT maps to NORTH; family JADE maps to WEST. Auxiliary rule: if an established family-match confidence exceeds 0.90 choose TURBO, otherwise choose ECO."}
     ],
     "context": "Synthetic routing task. Shipment SIGMA-41 is at 4C. Choose one route and one auxiliary mode.",
     "decision_choices": ["NORTH", "SOUTH", "WEST", "UNKNOWN"],
@@ -17,8 +17,8 @@
     "phase": "validation",
     "components": [
       {"name": "order_memory", "payload": "Synthetic memory: order OMEGA-9 belongs to family COBALT."},
-      {"name": "classification_skill", "payload": "Synthetic classification rule: COBALT with priority P2 maps to class Q."},
-      {"name": "staging_policy", "payload": "Synthetic staging rule: class Q with queue depth below 3 maps to decision STAGE_C; under the same condition choose auxiliary DIRECT."}
+      {"name": "classification_skill", "payload": "Synthetic classification table for priority P2: family COBALT maps to class Q; family AMBER maps to class R; family JADE maps to class S."},
+      {"name": "staging_policy", "payload": "Synthetic staging table when queue depth is below 3: class Q maps to STAGE_C with auxiliary DIRECT; class R maps to STAGE_A with auxiliary NORMAL; class S maps to STAGE_B with auxiliary NORMAL."}
     ],
     "context": "Synthetic staging task. Order OMEGA-9 has priority P2 and current queue depth 2. Choose one staging decision and one auxiliary handling mode.",
     "decision_choices": ["STAGE_A", "STAGE_B", "STAGE_C", "UNKNOWN"],
