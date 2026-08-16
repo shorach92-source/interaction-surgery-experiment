@@ -39,6 +39,7 @@ STRICT EVIDENCE RULES:
 4. Do not invent missing mappings or bridge facts.
 5. If the evidence chain is incomplete, choose UNKNOWN for the decision.
 6. For the auxiliary field, choose only what is explicitly justified by the completed evidence chain; otherwise use NONE or CALIBRATED when available.
+7. FINAL CONSISTENCY CHECK: if your reason would contain any phrase such as "missing antecedent", "not established", "unresolved", "insufficient evidence", or "evidence chain is incomplete", then the decision MUST be UNKNOWN and the auxiliary MUST be NONE or CALIBRATED. Never output a specific decision while simultaneously saying a required antecedent is missing.
 
 Task context:
 {scenario["context"]}
