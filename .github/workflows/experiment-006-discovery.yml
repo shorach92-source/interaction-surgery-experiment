@@ -1,4 +1,4 @@
-name: Experiment 006 candidate replication
+name: Experiment 006 generic guard kill test
 
 on:
   push:
@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 jobs:
-  candidate-replication:
+  generic-guard:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     env:
@@ -26,12 +26,12 @@ jobs:
         run: python -m unittest discover -s tests -v
       - name: Verify secret is configured
         run: test -n "$OPENAI_API_KEY" || (echo "Missing repository secret OPENAI_API_KEY" && exit 1)
-      - name: Replicate D3-02 candidate
-        run: python experiment_006_candidate_replication.py --model gpt-5.4-mini --scenario D3-02 --repetitions 5 --bootstrap-samples 5000 --output results_006_candidate
+      - name: Run generic calibration guard
+        run: python experiment_006_generic_guard.py --model gpt-5.4-mini --scenario D3-02 --repetitions 5 --bootstrap-samples 5000 --output results_006_generic_guard
       - name: Upload results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: experiment-006-candidate-${{ github.run_id }}
-          path: results_006_candidate/
+          name: experiment-006-generic-guard-${{ github.run_id }}
+          path: results_006_generic_guard/
           if-no-files-found: warn
