@@ -1,0 +1,33 @@
+name: Candidate 013 event-censoring kill test
+
+on:
+  push:
+    paths:
+      - 'candidate_013/**'
+      - '.github/workflows/experiment-013-event-censoring.yml'
+  workflow_dispatch:
+
+jobs:
+  kill-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install numeric dependency
+        run: pip install numpy
+      - name: Compile
+        run: python -m py_compile candidate_013/event_censoring_kill_test.py
+      - name: Run predeclared 10-seed synthetic kill test
+        run: |
+          python candidate_013/event_censoring_kill_test.py \
+            --seeds 10 \
+            --seed-start 1000 \
+            --output candidate_013/run
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: candidate-013-event-censoring-${{ github.run_id }}
+          path: candidate_013/run/
