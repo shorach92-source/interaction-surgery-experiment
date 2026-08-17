@@ -1,0 +1,42 @@
+name: Candidate 012 FGL Phase A
+
+on:
+  push:
+    paths:
+      - 'candidate_012/**'
+      - '.github/workflows/experiment-012-fgl.yml'
+  workflow_dispatch:
+
+jobs:
+  fgl-phase-a:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Compile
+        run: python -m py_compile candidate_012/fgl_phase_a.py
+      - name: Verify secret
+        run: |
+          python - <<'PY'
+          import os
+          assert os.environ.get('OPENAI_API_KEY','').startswith('sk-')
+          print('secret configured')
+          PY
+      - name: Run Phase A falsification pilot
+        run: |
+          python candidate_012/fgl_phase_a.py \
+            --model gpt-5.4-mini \
+            --repetitions 1 \
+            --output candidate_012/live_run
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: candidate-012-fgl-${{ github.run_id }}
+          path: candidate_012/live_run/
