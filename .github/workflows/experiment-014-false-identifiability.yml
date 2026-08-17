@@ -1,0 +1,48 @@
+name: Candidate 014 false-identifiability kill test
+
+on:
+  push:
+    paths:
+      - 'candidate_014/**'
+      - '.github/workflows/experiment-014-false-identifiability.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  phase-a:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: pip install 'openai>=2.0.0,<3'
+      - name: Compile benchmark
+        run: python -m py_compile candidate_014/false_identifiability.py
+      - name: Verify secret
+        shell: bash
+        run: |
+          if [[ -z "$OPENAI_API_KEY" ]]; then
+            echo 'OPENAI_API_KEY is missing'
+            exit 1
+          fi
+      - name: Run Phase A
+        run: |
+          python candidate_014/false_identifiability.py \
+            --model gpt-5.4-mini \
+            --repetitions 1 \
+            --seed 1400 \
+            --output candidate_014/results
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: candidate-014-${{ github.run_id }}
+          path: candidate_014/results
+          retention-days: 30
