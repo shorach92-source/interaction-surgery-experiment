@@ -37,13 +37,22 @@ Each model returns q10/q50/q90 for the same target horizon. No model sees anothe
 
 ## Candidate feature
 
-For normalized forecasts across capability ranks 0,1,2:
+Normalize forecast differences by the scale of the observed series. For q90 define two ordered capability steps:
 
-- `upper_slope` = least-squares slope of q90 vs capability rank,
-- `lower_slope` = least-squares slope of q10 vs capability rank,
-- `CGW = upper_slope - lower_slope`.
+- `upper_step_1 = q90_mini - q90_nano`,
+- `upper_step_2 = q90_full - q90_mini`.
 
-The intended signature is a rising upper tail with a comparatively stable lower tail.
+The upper-tail signal is `ordered_upper = min(upper_step_1, upper_step_2)`, so a high score requires the upper tail to rise at **both** capability transitions rather than merely differing between endpoints.
+
+For q10, compute the mean absolute movement over the same two transitions:
+
+- `lower_motion = (abs(q10_mini-q10_nano) + abs(q10_full-q10_mini)) / 2`.
+
+Then:
+
+`CGW = ordered_upper - lower_motion`.
+
+The intended signature is therefore a consistently rising upper tail with a comparatively stable lower tail. This definition was frozen before the first live result.
 
 ## Ex-post target
 
@@ -64,7 +73,7 @@ CGW must beat, on the same instances:
 - strongest-model interval width q90-q10,
 - recent-history curvature.
 
-This deliberately makes the candidate hard to save: with only three ordered models, ordinary spread may contain nearly all useful information in the slope.
+This deliberately makes the candidate hard to save: ordinary spread may contain nearly all useful information in an ordered capability movement.
 
 ## Kill criteria
 
@@ -85,6 +94,6 @@ Nearby but not identical:
 - ordinary ensemble spread/disagreement for uncertainty;
 - multi-quantile post-hoc calibration such as MultiQT;
 - inter-model disagreement / semantic divergence methods;
-- the inverse-scaling forecasting paper itself, which documents the capability effect but does not, in the reviewed material, propose ordered per-instance capability slope as an ex-ante warning feature.
+- the inverse-scaling forecasting paper itself, which documents the capability effect but does not, in the reviewed material, propose ordered per-instance capability movement as an ex-ante warning feature.
 
 If a direct ordered-capability warning method is found later, close this candidate regardless of pilot performance.
