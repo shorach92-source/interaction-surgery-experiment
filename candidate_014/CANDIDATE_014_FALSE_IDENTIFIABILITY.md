@@ -1,7 +1,7 @@
 # Candidate 014 — False Identifiability in AI Scientists
 
 ## Status
-Candidate gap only. No novelty claim.
+Candidate gap only. No novelty claim. Phase A deterministic kill test launched.
 
 ## Research question
 Can an LLM scientific agent correctly recognize when **no experiment in the allowed intervention set can distinguish two competing hypotheses**, or does it invent/select a supposedly decisive test even when the hypotheses are observationally equivalent under all allowed experiments?
