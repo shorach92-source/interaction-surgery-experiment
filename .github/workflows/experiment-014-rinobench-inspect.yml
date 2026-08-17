@@ -1,0 +1,24 @@
+name: Candidate 014 RINoBench schema inspection
+
+on:
+  push:
+    paths:
+      - 'candidate_014/**'
+      - '.github/workflows/experiment-014-rinobench-inspect.yml'
+  workflow_dispatch:
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Inspect public RINoBench test schema
+        run: python candidate_014/inspect_rinobench.py
+      - name: Upload schema report
+        uses: actions/upload-artifact@v4
+        with:
+          name: candidate-014-schema-${{ github.run_id }}
+          path: candidate_014/schema_inspection/
