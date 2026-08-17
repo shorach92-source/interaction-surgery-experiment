@@ -1,0 +1,44 @@
+name: Candidate 011 SID pilot GPT-4.1
+
+on:
+  push:
+    paths:
+      - '.github/workflows/experiment-011-sid-gpt41.yml'
+  workflow_dispatch:
+
+jobs:
+  sid-pilot-gpt41:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Prepare API-compatible frozen runner
+        run: |
+          sed '/reasoning={"effort": "none"}/d' candidate_011/sid_pilot.py > /tmp/sid_pilot_gpt41.py
+          python -m py_compile /tmp/sid_pilot_gpt41.py
+      - name: Verify secret
+        run: |
+          python - <<'PY'
+          import os
+          k=os.environ.get('OPENAI_API_KEY','')
+          assert k.startswith('sk-'), 'OPENAI_API_KEY is missing'
+          print('secret configured')
+          PY
+      - name: Run frozen SID pilot on GPT-4.1
+        run: |
+          python /tmp/sid_pilot_gpt41.py \
+            --model gpt-4.1 \
+            --repetitions 1 \
+            --output candidate_011/gpt41_run
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: candidate-011-sid-gpt41-${{ github.run_id }}
+          path: candidate_011/gpt41_run/
