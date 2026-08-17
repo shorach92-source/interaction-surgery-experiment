@@ -1,0 +1,43 @@
+name: Candidate 011 canonical-aligned SID probe
+
+on:
+  push:
+    paths:
+      - '.github/workflows/experiment-011-sid-canonical.yml'
+  workflow_dispatch:
+
+jobs:
+  canonical-probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Compile
+        run: |
+          python -m py_compile candidate_011/sid_pilot.py candidate_011/sid_canonical_probe.py
+      - name: Verify secret
+        run: |
+          python - <<'PY'
+          import os
+          assert os.environ.get('OPENAI_API_KEY','').startswith('sk-')
+          print('secret configured')
+          PY
+      - name: Run final sensitivity probe
+        run: |
+          cd candidate_011
+          python sid_canonical_probe.py \
+            --model gpt-4.1 \
+            --repetitions 1 \
+            --output canonical_run
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: candidate-011-canonical-${{ github.run_id }}
+          path: candidate_011/canonical_run/
