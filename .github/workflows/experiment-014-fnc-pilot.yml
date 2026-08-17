@@ -1,0 +1,35 @@
+name: Candidate 014 FNC RINoBench pilot
+
+on:
+  push:
+    paths:
+      - 'candidate_014/fnc_rinobench_pilot.py'
+      - '.github/workflows/experiment-014-fnc-pilot.yml'
+  workflow_dispatch:
+
+jobs:
+  pilot:
+    runs-on: ubuntu-latest
+    env:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      FNC_MODEL: gpt-5.4-mini
+      FNC_PER_SCORE: '2'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Compile pilot
+        run: python -m py_compile candidate_014/fnc_rinobench_pilot.py
+      - name: Verify secret
+        run: test -n "$OPENAI_API_KEY"
+      - name: Run frozen three-arm RINoBench pilot
+        run: python candidate_014/fnc_rinobench_pilot.py
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: candidate-014-fnc-${{ github.run_id }}
+          path: candidate_014/pilot_results/
