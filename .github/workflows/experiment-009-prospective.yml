@@ -1,0 +1,37 @@
+name: Diagnostic 009 prospective scaffold
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/experiment-009-prospective.yml
+
+permissions:
+  contents: read
+
+jobs:
+  diagnostic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Compile diagnostic
+        run: python -m py_compile diagnostic_009/prospective_scaffold.py
+      - name: Verify secret is configured
+        run: test -n "$OPENAI_API_KEY" || (echo "Missing repository secret OPENAI_API_KEY" && exit 1)
+      - name: Run reconstructed 5-seed diagnostic
+        run: python diagnostic_009/prospective_scaffold.py --model gpt-5.4-mini --seeds 2000,2001,2002,2003,2004 --output diagnostic_009/live_results
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: diagnostic-009-${{ github.run_id }}
+          path: diagnostic_009/live_results/
+          if-no-files-found: warn
