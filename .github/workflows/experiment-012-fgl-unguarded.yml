@@ -1,0 +1,49 @@
+name: Candidate 012 FGL Phase A unguarded
+
+on:
+  push:
+    paths:
+      - '.github/workflows/experiment-012-fgl-unguarded.yml'
+  workflow_dispatch:
+
+jobs:
+  fgl-unguarded:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Prepare frozen unguarded runner
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          src = Path('candidate_012/fgl_phase_a.py').read_text()
+          needle = 'Important: successful downstream calculations do not themselves change the properties of their input evidence.\n\n'
+          assert needle in src
+          Path('/tmp/fgl_unguarded.py').write_text(src.replace(needle, ''))
+          PY
+          python -m py_compile /tmp/fgl_unguarded.py
+      - name: Verify secret
+        run: |
+          python - <<'PY'
+          import os
+          assert os.environ.get('OPENAI_API_KEY','').startswith('sk-')
+          print('secret configured')
+          PY
+      - name: Run unguarded Phase A
+        run: |
+          python /tmp/fgl_unguarded.py \
+            --model gpt-5.4-mini \
+            --repetitions 1 \
+            --output candidate_012/unguarded_run
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: candidate-012-fgl-unguarded-${{ github.run_id }}
+          path: candidate_012/unguarded_run/
