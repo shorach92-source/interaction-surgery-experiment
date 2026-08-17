@@ -1,0 +1,37 @@
+name: Diagnostic 010 unguarded modal collapse
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/experiment-010-modal-collapse-unguarded.yml
+
+permissions:
+  contents: read
+
+jobs:
+  diagnostic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Compile diagnostic
+        run: python -m py_compile diagnostic_010/modal_collapse.py diagnostic_010/modal_collapse_unguarded.py
+      - name: Verify secret is configured
+        run: test -n "$OPENAI_API_KEY" || (echo "Missing repository secret OPENAI_API_KEY" && exit 1)
+      - name: Run unguarded modal-collapse pilot
+        run: python diagnostic_010/modal_collapse_unguarded.py --model gpt-5.4-mini --repetitions 1 --output diagnostic_010/unguarded_results
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: diagnostic-010-unguarded-${{ github.run_id }}
+          path: diagnostic_010/unguarded_results/
+          if-no-files-found: warn
